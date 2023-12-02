@@ -10,9 +10,6 @@ separateLines.forEach(line => {
     const firstMatchValue = determineMatchValue(matches[0][0]);
     const lastMatchValue = determineMatchValue(matches[matches.length-1][0]); 
     sum += (parseInt(firstMatchValue+lastMatchValue));
-    console.log(firstMatchValue);
-    console.log(lastMatchValue);
-    console.log(sum);
 })
 
 
