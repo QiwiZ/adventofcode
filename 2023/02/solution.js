@@ -40,22 +40,22 @@ console.log(resultSum2);
 function calculateMinimumColorRequirements(matches) {
     let powerOfSet = 1;
 
-    const minimumColorAmounts = {
+    const maxColorValue = {
         'red': 0,
         'green': 0,
         'blue': 0,
     }
 
     for(let match of matches) {
-        if(parseInt(match[1]) > minimumColorAmounts[match[2]]) {
-            minimumColorAmounts[match[2]] = parseInt(match[1]);
+        if(parseInt(match[1]) > maxColorValue[match[2]]) {
+            maxColorValue[match[2]] = parseInt(match[1]);
         } 
     }
 
-    Object.entries(minimumColorAmounts).forEach(amount => {
+    Object.entries(maxColorValue).forEach(amount => {
         powerOfSet *= amount[1];
     })
 
-    console.log(minimumColorAmounts);
+    console.log(maxColorValue);
     return powerOfSet;
 }
