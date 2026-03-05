@@ -3,36 +3,107 @@ import readSeparateLinesFromPuzzleInput from "../../common/filereader.mjs"
 let separateLines = readSeparateLinesFromPuzzleInput();
 let result = 0;
 
-let orderingRules = [];
-let updates = [];
+let matrix = []
 
-orderingRules = separateLines.filter(inputLine => inputLine.includes('|'));
-updates = separateLines.filter(inputLine => inputLine.includes(',')).map(update => update.split(','));
-
-let mappedRules = {}
-
-orderingRules.forEach(rule => {
-    let ruleElements = rule.split('|');
-    let mapElement = ruleElements[1];
-    let mandatoryPredecessor = ruleElements[0];
-
-    if(!mappedRules[mapElement]) {
-        mappedRules[mapElement] = [mandatoryPredecessor];
-    } else {
-        mappedRules[mapElement].push(mandatoryPredecessor);
-    }
+separateLines.forEach(inputLine => {
+    matrix.push(inputLine.split(""))
 })
 
+function getStartIndex() {
+    let startIndex = {};
+    for(let rowIndex = 0; rowIndex < matrix.length; rowIndex++) {
+        if(matrix[rowIndex].includes('^')) startIndex[rowIndex] = matrix[rowIndex].indexOf('^'); 
+    }
 
+    return startIndex;
+}
 
-let validUpdates = updates.filter(update => 
-    !update.filter(pageNumber => {
-        return mappedRules[pageNumber].filter(mandatoryPredecessor => {
-            return update.indexOf(mandatoryPredecessor) > update.indexOf(pageNumber)}).length
-    }).length
-)
+function determineDistinctGuardPositions() {
+    let startIndex = getStartIndex();
+    let initialRowIndex = Object.keys(startIndex)[0];
+    let initialColumIndex = startIndex[initialRowIndex];
 
-validUpdates.forEach(validUpdate => result += Number(validUpdate[Math.floor(validUpdate.length / 2)]))
+    return foo(initialRowIndex, initialColumIndex);
+    
+}
+
+function foo(initialRowIndex, initialColumnIndex) {
+    let visitedPositions = {};
+    let rowLength = matrix[0].length;
+    let walking = true;
+    let direction = 'up';
+    let currentRowIndex = initialRowIndex;
+    let currentColumnIndex = initialColumnIndex;
+    
+
+    while(walking) {
+        switch(direction){
+            case 'up':
+                for(currentRowIndex; currentRowIndex > 0; currentRowIndex--) {
+                    addVisitedLocation(currentRowIndex, currentColumnIndex, visitedPositions);
+
+                    if(matrix[currentRowIndex - 1][currentColumnIndex] === '#') {
+                        console.log(`turning right at {${currentRowIndex}, ${currentColumnIndex}}`)
+                        direction = 'right';
+                        break;
+                    }
+                }
+                break;
+            case 'right':
+                for(currentColumnIndex; currentColumnIndex < rowLength; currentColumnIndex++) {
+                    addVisitedLocation(currentRowIndex, currentColumnIndex, visitedPositions);
+
+                    if(matrix[currentRowIndex][currentColumnIndex + 1] === '#') {
+                        console.log(`turning down at {${currentRowIndex}, ${currentColumnIndex}}`)
+                        direction = 'down';
+                        break;
+                    }
+                }
+                break;
+            case 'down':
+                for(currentRowIndex; currentRowIndex < matrix.length; currentRowIndex++) {
+                    addVisitedLocation(currentRowIndex, currentColumnIndex, visitedPositions);
+
+                    if(currentRowIndex + 1 >= matrix.length) {
+                        console.log(`exiting at: {${currentRowIndex}, ${currentColumnIndex}}`)
+                        walking = false;
+                        break;
+                    }
+
+                    if(matrix[currentRowIndex + 1][currentColumnIndex] === '#') {
+                        console.log(`turning left at {${currentRowIndex}, ${currentColumnIndex}}`)
+                        direction = 'left';
+                        break;
+                    }
+                }
+                break;
+            case 'left':
+                for(currentColumnIndex; currentColumnIndex > 0; currentColumnIndex--) {
+                    addVisitedLocation(currentRowIndex, currentColumnIndex, visitedPositions);
+
+                    if(matrix[currentRowIndex][currentColumnIndex - 1] === '#') {
+                        console.log(`turning up at {${currentRowIndex}, ${currentColumnIndex}}`)
+                        direction = 'up';
+                        break;
+                    }
+                }
+                break;
+        }
+    }
+    return visitedPositions;
+}
+
+function addVisitedLocation(rowIndex, columnIndex, visitedPositions) {
+    if(!visitedPositions[rowIndex]) {
+        visitedPositions[rowIndex] = new Set([columnIndex]);
+    } else {
+        visitedPositions[rowIndex].add(columnIndex);
+    }
+}
+
+Object.entries(determineDistinctGuardPositions()).forEach(row => {
+    result += row[1].size;
+})
 
 console.log(`result is ${result}`)
 
